@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "title": "Computadora Gamer RTX",
+    "description": "Computadora gamer con procesador i9 y RTX 4080",
+    "code": "CG001",
+    "price": 2500,
+    "status": true,
+    "stock": 5,
+    "category": "Compusgamers",
+    "thumbnails": [
+      "computadora-gamer.jpg"
+    ]
+  },
+  {
+    "title": "Consola PlayStation 5",
+    "description": "Consola de videojuegos PlayStation 5 con 1TB de almacenamiento",
+    "code": "CVJ001",
+    "price": 600,
+    "status": true,
+    "stock": 10,
+    "category": "Consolas de videojuegos",
+    "thumbnails": [
+      "ps5.jpg"
+    ]
+  },
+  {
+    "title": "Teclado Mecánico RGB",
+    "description": "Teclado mecánico para gamers con iluminación RGB",
+    "code": "ACG001",
+    "price": 120,
+    "status": true,
+    "stock": 15,
+    "category": "Accesorios gamers",
+    "thumbnails": [
+      "teclado-rgb.jpg"
+    ]
+  },
+  {
+    "title": "Monitor 27'' 144Hz",
+    "description": "Monitor gamer de 27 pulgadas con tasa de refresco de 144Hz",
+    "code": "MG001",
+    "price": 300,
+    "status": true,
+    "stock": 8,
+    "category": "Monitores gamers",
+    "thumbnails": [
+      "monitor-gamer.jpg"
+    ]
+  },
+  {
+    "title": "Auriculares Inalámbricos 7.1",
+    "description": "Auriculares gaming con sonido envolvente 7.1 y micrófono",
+    "code": "ACG002",
+    "price": 150,
+    "status": true,
+    "stock": 12,
+    "category": "Accesorios gamers",
+    "thumbnails": [
+      "auriculares-gamer.jpg"
+    ]
+  }
+]
