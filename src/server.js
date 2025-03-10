@@ -88,6 +88,22 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('updateProduct', (updatedFields) => {
+    try {
+      console.log('Intentando actualizar producto:', updatedFields);
+      const resultado = productManager.updateProduct(updatedFields.id, updatedFields);
+      console.log('Resultado de la actualización:', resultado);
+      if (resultado) {
+        io.emit('updateProducts', productManager.getAllProducts());
+      } else {
+        socket.emit('error', 'Producto no encontrado');
+      }
+    } catch (error) {
+      console.error('Error al actualizar producto:', error);
+      socket.emit('error', 'Error al actualizar el producto');
+    }
+  });
+
   // Manejo de desconexión
   socket.on('disconnect', () => {
     console.log('Cliente desconectado con ID:', socket.id);

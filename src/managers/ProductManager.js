@@ -72,7 +72,11 @@ class ProductManager {
 
   updateProduct(id, updatedFields) {
     console.log('Actualizando producto con ID:', id);
+    console.log('Campos a actualizar:', updatedFields);
+
     const productIndex = this.products.findIndex(product => product.id === id);
+    console.log('Índice encontrado:', productIndex);
+
     if (productIndex !== -1) {
       console.log('Producto encontrado:', this.products[productIndex]);
       this.products[productIndex] = { ...this.products[productIndex], ...updatedFields };
