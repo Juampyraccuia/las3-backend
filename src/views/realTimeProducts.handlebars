@@ -1,0 +1,76 @@
+{{#*inline "header"}}
+<h1>Lista de Productos</h1>
+{{/inline}}
+
+<div class="content">
+  <ul id="productList"></ul>
+
+  <h2>Agregar Producto</h2>
+  <form onsubmit="addProduct(event)">
+    <input type="text" name="title" placeholder="Título" required>
+    <input type="text" name="description" placeholder="Descripción" required>
+    <input type="text" name="code" placeholder="Código" required>
+    <input type="number" name="price" placeholder="Precio" required>
+    <input type="checkbox" name="status"> Activo
+    <input type="number" name="stock" placeholder="Stock" required>
+    <input type="text" name="category" placeholder="Categoría" required>
+    <input type="text" name="thumbnails" placeholder="Thumbnails (separados por comas)" required>
+    <button type="submit">Agregar Producto</button>
+  </form>
+
+  <h2>Eliminar Producto</h2>
+  <input type="number" id="deleteId" placeholder="ID del producto a eliminar">
+  <button onclick="deleteProduct(document.getElementById('deleteId').value)">Eliminar Producto</button>
+</div>
+
+<script>
+  const socket = io();
+
+  // Escuchar el evento para actualizar la lista de productos
+  socket.on('updateProducts', (products) => {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = ''; // Limpiar la lista
+
+    products.forEach(product => {
+      const li = document.createElement('li');
+      li.textContent = `ID: ${product.id}, Título: ${product.title}`;
+      productList.appendChild(li);
+    });
+  });
+
+  // Función para agregar un producto
+  function addProduct(event) {
+    event.preventDefault();
+    const form = event.target;
+    const product = {
+      title: form.title.value,
+      description: form.description.value,
+      code: form.code.value,
+      price: parseFloat(form.price.value),
+      status: form.status.checked,
+      stock: parseInt(form.stock.value),
+      category: form.category.value,
+      thumbnails: form.thumbnails.value.split(',')
+    };
+    console.log('Intentando agregar producto:', product);
+    socket.emit('addProduct', product);
+    form.reset();
+  }
+
+  // Función para eliminar un producto
+  function deleteProduct(id) {
+    console.log('Intentando eliminar producto con ID:', id);
+    console.log('Lista actual de productos:', document.getElementById('productList').innerHTML);
+
+    // Verificar si el producto existe en la lista actual
+    const productList = document.getElementById('productList');
+    const productExists = Array.from(productList.getElementsByTagName('li'))
+      .some(li => li.textContent.includes(`ID: ${id}`));
+    console.log('¿Existe el producto en la lista?', productExists);
+
+    socket.emit('deleteProduct', id);
+    socket.once('error', (error) => {
+      console.log('Error del servidor:', error);
+    });
+  }
+</script>
