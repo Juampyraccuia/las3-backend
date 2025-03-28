@@ -1,111 +1,66 @@
 
 <div class="content">
-  <ul id="productList"></ul>
+  <h1>Productos en Tiempo Real</h1>
+  
+  <div class="products-list">
+    {{#each products}}
+      <div class="product-item">
+        <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-thumbnail">
+        <div class="product-info">
+          <h3>{{this.title}}</h3>
+          <p class="product-id">ID: {{this._id}}</p>
+          <p>Precio: ${{this.price}}</p>
+          <p>Stock: {{this.stock}}</p>
+          <p>Código: {{this.code}}</p>
+          <p>Categoría: {{this.category}}</p>
+        </div>
+      </div>
+    {{/each}}
+  </div>
 
-  <h2>Agregar Producto</h2>
-  <form onsubmit="addProduct(event)">
-    <input type="text" name="title" placeholder="Título" required>
-    <input type="text" name="description" placeholder="Descripción" required>
-    <input type="text" name="code" placeholder="Código" required>
-    <input type="number" name="price" placeholder="Precio" required>
-    <input type="checkbox" name="status"> Activo
-    <input type="number" name="stock" placeholder="Stock" required>
-    <input type="text" name="category" placeholder="Categoría" required>
-    <input type="text" name="thumbnails" placeholder="Thumbnails (separados por comas)" required>
-    <button type="submit">Agregar Producto</button>
-  </form>
+  <div class="forms-section">
+    <h2>Agregar Producto</h2>
+    <form onsubmit="addProduct(event)" class="product-form">
+      <input type="text" name="title" placeholder="Título" required>
+      <input type="text" name="description" placeholder="Descripción" required>
+      <input type="text" name="code" placeholder="Código" required>
+      <input type="number" name="price" placeholder="Precio" required>
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" name="status"> Activo
+        </label>
+      </div>
+      <input type="number" name="stock" placeholder="Stock" required>
+      <input type="text" name="category" placeholder="Categoría" required>
+      <input type="text" name="thumbnails" placeholder="Thumbnails (separados por comas)" required>
+      <button type="submit">Agregar Producto</button>
+    </form>
 
-  <h2>Eliminar Producto</h2>
-  <input type="number" id="deleteId" placeholder="ID del producto a eliminar">
-  <button onclick="deleteProduct(document.getElementById('deleteId').value)">Eliminar Producto</button>
+    <h2>Eliminar Producto</h2>
+    <form onsubmit="deleteProduct(event)" class="delete-form">
+      <input type="text" id="deleteId" placeholder="ID del producto a eliminar">
+      <button type="submit">Eliminar Producto</button>
+    </form>
 
-  <h2>Modificar Producto</h2>
-  <form onsubmit="updateProduct(event)">
-    <input type="number" name="id" placeholder="ID del producto" required>
-    <input type="text" name="title" placeholder="Nuevo Título">
-    <input type="text" name="description" placeholder="Nueva Descripción">
-    <input type="text" name="code" placeholder="Nuevo Código">
-    <input type="number" name="price" placeholder="Nuevo Precio">
-    <input type="checkbox" name="status"> Nuevo Estado
-    <input type="number" name="stock" placeholder="Nuevo Stock">
-    <input type="text" name="category" placeholder="Nueva Categoría">
-    <input type="text" name="thumbnails" placeholder="Nuevas Thumbnails (separados por comas)">
-    <button type="submit">Modificar Producto</button>
-  </form>
+    <h2>Modificar Producto</h2>
+    <form onsubmit="updateProduct(event)" class="product-form">
+      <input type="text" name="id" placeholder="ID del producto" required>
+      <input type="text" name="title" placeholder="Nuevo Título">
+      <input type="text" name="description" placeholder="Nueva Descripción">
+      <input type="text" name="code" placeholder="Nuevo Código">
+      <input type="number" name="price" placeholder="Nuevo Precio">
+      <div class="checkbox-group">
+        <label>
+          <input type="checkbox" name="status"> Nuevo Estado
+        </label>
+      </div>
+      <input type="number" name="stock" placeholder="Nuevo Stock">
+      <input type="text" name="category" placeholder="Nueva Categoría">
+      <input type="text" name="thumbnails" placeholder="Nuevas Thumbnails (separados por comas)">
+      <button type="submit">Modificar Producto</button>
+    </form>
+  </div>
 </div>
 
-<script>
-  const socket = io();
-
-  // Escuchar el evento para actualizar la lista de productos
-  socket.on('updateProducts', (products) => {
-    const productList = document.getElementById('productList');
-    productList.innerHTML = ''; // Limpiar la lista
-
-    products.forEach(product => {
-      const li = document.createElement('li');
-      li.textContent = `ID: ${product.id}, Título: ${product.title}`;
-      productList.appendChild(li);
-    });
-  });
-
-  // Función para agregar un producto
-  function addProduct(event) {
-    event.preventDefault();
-    const form = event.target;
-    const product = {
-      title: form.title.value,
-      description: form.description.value,
-      code: form.code.value,
-      price: parseFloat(form.price.value),
-      status: form.status.checked,
-      stock: parseInt(form.stock.value),
-      category: form.category.value,
-      thumbnails: form.thumbnails.value.split(',')
-    };
-    console.log('Intentando agregar producto:', product);
-    socket.emit('addProduct', product);
-    form.reset();
-  }
-
-  // Función para eliminar un producto
-  function deleteProduct(id) {
-    console.log('Intentando eliminar producto con ID:', id);
-    console.log('Lista actual de productos:', document.getElementById('productList').innerHTML);
-
-    // Verificar si el producto existe en la lista actual
-    const productList = document.getElementById('productList');
-    const productExists = Array.from(productList.getElementsByTagName('li'))
-      .some(li => li.textContent.includes(`ID: ${id}`));
-    console.log('¿Existe el producto en la lista?', productExists);
-
-    socket.emit('deleteProduct', id);
-    socket.once('error', (error) => {
-      console.log('Error del servidor:', error);
-    });
-  }
-
-  // Función para modificar un producto
-  function updateProduct(event) {
-    event.preventDefault();
-    const form = event.target;
-    const updatedFields = {
-      id: parseInt(form.id.value),
-      title: form.title.value,
-      description: form.description.value,
-      code: form.code.value,
-      price: form.price.value ? parseFloat(form.price.value) : undefined,
-      status: form.status.checked,
-      stock: form.stock.value ? parseInt(form.stock.value) : undefined,
-      category: form.category.value,
-      thumbnails: form.thumbnails.value ? form.thumbnails.value.split(',') : undefined
-    };
-
-    // Eliminar campos undefined
-    Object.keys(updatedFields).forEach(key => updatedFields[key] === undefined && delete updatedFields[key]);
-
-    console.log('Intentando modificar producto:', updatedFields);
-    socket.emit('updateProduct', updatedFields);
-    form.reset();
-  }
-</script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realTimeProducts.js"></script>

@@ -9,7 +9,7 @@
     "stock": 5,
     "category": "Compusgamers",
     "thumbnails": [
-      "computadora-gamer.jpg"
+      "/images/computadora-gamer.jpg"
     ]
   },
   {
@@ -22,7 +22,7 @@
     "stock": 10,
     "category": "Consolas de videojuegos",
     "thumbnails": [
-      "ps5.jpg"
+      "/images/ps5.jpg"
     ]
   },
   {
@@ -35,7 +35,7 @@
     "stock": 15,
     "category": "Accesorios gamers",
     "thumbnails": [
-      "teclado-rgb.jpg"
+      "/images/teclado-rgb.jpg"
     ]
   },
   {
@@ -48,7 +48,7 @@
     "stock": 8,
     "category": "Monitores gamers",
     "thumbnails": [
-      "monitor-gamer.jpg"
+      "/images/monitor-gamer.jpg"
     ]
   },
   {
@@ -61,7 +61,7 @@
     "stock": 12,
     "category": "Accesorios gamers",
     "thumbnails": [
-      "auriculares-gamer.jpg"
+      "/images/auriculares-gamer.jpg"
     ]
   }
 ]

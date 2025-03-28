@@ -1,121 +1,82 @@
 const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const { engine } = require('express-handlebars');
+const handlebars = require('express-handlebars');
+const http = require('http');
+const socketIO = require('socket.io');
+const mongoose = require('mongoose');
+require('dotenv').config();
 const productsRouter = require('./routes/products');
 const cartsRouter = require('./routes/carts');
+const viewsRouter = require('./routes/views');
 const ProductManager = require('./managers/ProductManager');
+const productManager = new ProductManager();
+
 const app = express();
-const PORT = 8080;
+const server = http.createServer(app);
+const io = socketIO(server);
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB Atlas'))
+  .catch(err => console.error('Error connecting to MongoDB:', err));
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
 
 // Configuración de Handlebars
-app.engine('handlebars', engine({
-  layoutsDir: './src/views/layouts',
-  partialsDir: './src/views/partials',
-  extname: 'handlebars',
-  defaultLayout: 'main'
+app.engine('handlebars', handlebars.engine({
+    runtimeOptions: {
+        allowProtoPropertiesByDefault: true,
+        allowProtoMethodsByDefault: true
+    }
 }));
-app.set('view engine', 'handlebars');
 app.set('views', './src/views');
-
-// Middleware para parsear JSON y datos de formularios
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Para manejar formularios
-app.use(express.static('public')); // Para servir archivos estáticos
+app.set('view engine', 'handlebars');
 
 // Rutas
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
+app.use('/', viewsRouter);
 
-// Ruta para la vista de inicio
-app.get('/', (req, res) => {
-  res.render('home', { title: 'Inicio' });
-});
-
-// Ruta para la vista de productos en tiempo real
-app.get('/realtimeproducts', (req, res) => {
-  res.render('realTimeProducts', {
-    title: 'Productos en Tiempo Real',
-    socket: true
-  });
-});
-
-// Crear servidor HTTP y Socket.IO
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
-
-// Crear una instancia de ProductManager
-const productManager = new ProductManager();
-
-// Manejo de conexiones de WebSocket
+// WebSocket
 io.on('connection', (socket) => {
-  console.log('Nuevo cliente conectado con ID:', socket.id);
-
-  // Emitir la lista de productos al cliente cuando se conecta
-  socket.emit('updateProducts', productManager.getAllProducts());
-
-  // Escuchar eventos de agregar y eliminar productos
-  socket.on('addProduct', (product) => {
+  // Remove console.log for client connection
+  
+  socket.on('addProduct', async (product) => {
     try {
-      console.log('Intentando agregar producto:', product);
-      const newProduct = productManager.addProduct(product);
-      console.log('Producto agregado:', newProduct);
-      io.emit('updateProducts', productManager.getAllProducts());
+      const newProduct = await productManager.addProduct(product);
+      io.emit('productAdded', newProduct);
     } catch (error) {
-      console.error('Error al agregar producto:', error);
-      socket.emit('error', 'Error al agregar el producto');
+      socket.emit('error', error.message);
     }
   });
 
-  socket.on('deleteProduct', (id) => {
+  socket.on('deleteProduct', async (id) => {
     try {
-      console.log('Intentando eliminar producto con ID:', id);
-      const resultado = productManager.deleteProduct(id);
-      console.log('Resultado de la eliminación:', resultado);
-      if (resultado) {
-        io.emit('updateProducts', productManager.getAllProducts());
+      await productManager.deleteProduct(id);
+      io.emit('productDeleted');
+    } catch (error) {
+      socket.emit('error', error.message);
+    }
+  });
+
+  socket.on('updateProduct', async (productData) => {
+    try {
+      const { id, ...updateData } = productData;
+      const updatedProduct = await productManager.updateProduct(id, updateData);
+      if (updatedProduct) {
+          io.emit('productUpdated', updatedProduct);
+          io.emit('productAdded'); // This will refresh the page
       } else {
-        socket.emit('error', 'Producto no encontrado');
+          socket.emit('error', 'Product not found');
       }
     } catch (error) {
-      console.error('Error al eliminar producto:', error);
-      socket.emit('error', 'Error al eliminar el producto');
+      socket.emit('error', error.message);
     }
-  });
-
-  socket.on('updateProduct', (updatedFields) => {
-    try {
-      console.log('Intentando actualizar producto:', updatedFields);
-      const resultado = productManager.updateProduct(updatedFields.id, updatedFields);
-      console.log('Resultado de la actualización:', resultado);
-      if (resultado) {
-        io.emit('updateProducts', productManager.getAllProducts());
-      } else {
-        socket.emit('error', 'Producto no encontrado');
-      }
-    } catch (error) {
-      console.error('Error al actualizar producto:', error);
-      socket.emit('error', 'Error al actualizar el producto');
-    }
-  });
-
-  // Manejo de desconexión
-  socket.on('disconnect', () => {
-    console.log('Cliente desconectado con ID:', socket.id);
   });
 });
 
-// Manejo de errores de Socket.IO
-io.on('connection_error', (error) => {
-  console.error('Error de conexión:', error.message);
-});
-
-// Iniciar el servidor
-httpServer.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

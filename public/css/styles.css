@@ -1,0 +1,13 @@
+.out-of-stock {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.in-stock {
+    color: #28a745;
+}
+
+button.add-to-cart[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+}

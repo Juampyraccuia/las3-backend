@@ -1,19 +1,15 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{title}}</title>
-  {{#if socket}}
-  <script src="/socket.io/socket.io.js"></script>
-  {{/if}}
+    <meta charset="utf-8">
+    <title>Mi Tienda</title>
+    <link rel="stylesheet" href="/css/products.css">
+    <link rel="stylesheet" href="/css/productDetail.css">
+    <link rel="stylesheet" href="/css/realTimeProducts.css">
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/error.css">
 </head>
-
 <body>
-  {{> header}}
-  {{{body}}}
-  {{> footer}}
+    {{{body}}}
 </body>
-
 </html>
